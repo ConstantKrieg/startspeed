@@ -18,7 +18,6 @@ type HorseInfo = {
 }
 
 const START_LIST_API_BASE_URL = process.env.START_LIST_API_BASE_URL;
-console.log(START_LIST_API_BASE_URL)
 
 const fetchTrackId = (trackName: string): Promise<number> => {
 
