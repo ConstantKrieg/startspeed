@@ -18,7 +18,7 @@ When these are set the application can be installed by running the following com
 
 `npm run build`
 
-`npm run install local` (requires sudo rights)
+`npm run install_local` (requires sudo rights)
 
 Application can then be used by the following command
  
