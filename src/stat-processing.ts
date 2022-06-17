@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { fetchData, ResponseCallbackParams } from './common';
+import { RateLimiter } from './rate-limiter';
 require('dotenv').config();
 
 type StatRaceInfo = {
@@ -52,6 +53,8 @@ type HorseStartSpeedInfo = {
 
 const STAT_API_URL_BASE = process.env.STAT_API_URL_BASE;
 
+const rateLimiter = RateLimiter();
+
 const fetchHorseStatId = (startNumber: number, horseName: string): Promise<number> => {
 
     const url = STAT_API_URL_BASE + '/horses/search/organisation/TROT'
@@ -67,10 +70,11 @@ const fetchHorseStatId = (startNumber: number, horseName: string): Promise<numbe
     const responseCallback = (params: ResponseCallbackParams) => {
         const results = params.resp.data;
         const horseInfo = results[0] || {horseId: -1}
+        rateLimiter.returnToken();
         params.resolve(horseInfo.horseId);
     }
 
-    return fetchData(url, responseCallback, undefined, queryParams);
+    return rateLimiter.requestToken().then( _ => fetchData(url, responseCallback, undefined, queryParams));
 }
 
 
@@ -83,10 +87,11 @@ const fetchHorseRaceHistory = (startNumber: number, horseName: string, horseStat
                 race.withdrawn === false && race.startMethod === 'A' && race.startPosition.sortValue < 9);
         
         const raceIdList: RaceId[] = raceList.map((race: StatRaceInfo) => {return { raceId: race.raceInformation.raceId, raceDayId: race.raceInformation.raceDayId, horseStartNumber: race.startPosition.sortValue}});
+        rateLimiter.returnToken();
         params.resolve({startNumber, horseName, raceIdList});
     }
 
-    return fetchData(url, responseCallback);
+    return rateLimiter.requestToken().then(() => fetchData(url, responseCallback));
 }
 
 const fetchStartInfromationForHorse = (horseStats: HorseStats): Promise<HorseStartSpeedInfo> => {
@@ -94,26 +99,30 @@ const fetchStartInfromationForHorse = (horseStats: HorseStats): Promise<HorseSta
         return new Promise<StartLeaderInfo>((resolve, reject) => {
             const raceDayUrl = STAT_API_URL_BASE + '/raceinfo/results/organisation/TROT/sourceofdata/SPORT/racedayid/' + raceId.raceDayId
 
-            axios.get(raceDayUrl)
-                .then(resp => {
-                    const racesOfTheDay: RaceDayInfo = resp.data;
-
-                    if (!racesOfTheDay.racesWithReadyResult) {
-                        resolve({tempo: '', horseStartNumber: raceId.horseStartNumber})
-                        return;
-                    }
-
-                    
-                    const correctRace: HistoryRaceInfo | undefined = racesOfTheDay.racesWithReadyResult
-                        .filter((raceInfo: HistoryRaceInfo) => raceInfo.raceId === raceId.raceId).pop();
-                    
-                    if (!correctRace) {
-                        resolve({tempo: '', horseStartNumber: raceId.horseStartNumber})
-                        return;
-                    } 
-
-                    resolve({tempo: correctRace!.generalInfo.tempoText, horseStartNumber: raceId.horseStartNumber})
-                }).catch(e => console.log(e));
+            rateLimiter.requestToken()
+                .then(_ => {
+                    axios.get(raceDayUrl)
+                    .then(resp => {
+                        rateLimiter.returnToken();
+                        const racesOfTheDay: RaceDayInfo = resp.data;
+    
+                        if (!racesOfTheDay.racesWithReadyResult) {
+                            resolve({tempo: '', horseStartNumber: raceId.horseStartNumber})
+                            return;
+                        }
+    
+                        
+                        const correctRace: HistoryRaceInfo | undefined = racesOfTheDay.racesWithReadyResult
+                            .filter((raceInfo: HistoryRaceInfo) => raceInfo.raceId === raceId.raceId).pop();
+                        
+                        if (!correctRace) {
+                            resolve({tempo: '', horseStartNumber: raceId.horseStartNumber})
+                            return;
+                        } 
+    
+                        resolve({tempo: correctRace!.generalInfo.tempoText, horseStartNumber: raceId.horseStartNumber})
+                    }).catch(e => rateLimiter.returnToken());
+                });
         });
     });
 
