@@ -8,7 +8,7 @@ This project scores participant horses in a trotting race based on how often the
 The API's used do not allow any kind of readily available application to be made public so API addresses are not available on this repo. 
 
 startspeed is a CLI application. To run the application one must have the following:
-- a redis database hosted and it's set as an environmental variable along with credentials
+- a redis database hosted and it's address set as an environmental variable along with credentials
 - API address for retrieving upcoming races and their participants as an env variable
 - API address for retrieving previous race results for participants as an env variable
 
