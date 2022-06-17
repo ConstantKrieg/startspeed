@@ -1,0 +1,40 @@
+{
+  "name": "startspeed",
+  "version": "1.0.0",
+  "description": "Fetches trotting cards and results from the web and tries to determine start speed of horses for upcoming races",
+  "main": "lib/index.js",
+  "bin": {
+    "startspeed": "./lib/index.js"
+  },
+  "scripts": {
+    "start": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/index.ts",
+    "start:windows": "nodemon --watch 'src/**/*.ts' --exec \"npx ts-node\" src/index.ts",
+    "create": "npm run build && npm run test",
+    "build": "tsc -p .",
+    "install_local": "sudo npm i -g",
+    "refresh": "rm -rf ./node_modules ./package-lock.json && npm install"
+  },
+  "author": "tokito",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/clear": "^0.1.2",
+    "@types/commander": "^2.12.2",
+    "@types/figlet": "^1.5.4",
+    "@types/node": "^17.0.41",
+    "dotenv": "^16.0.1",
+    "nodemon": "^2.0.16",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "chalk": "^4.1.2",
+    "clear": "^0.1.0",
+    "cli-spinners": "^2.6.1",
+    "commander": "^9.3.0",
+    "figlet": "^1.5.2",
+    "ioredis": "^5.0.6",
+    "ora": "^5.4.1",
+    "path": "^0.12.7"
+  }
+}
