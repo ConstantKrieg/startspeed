@@ -1,5 +1,8 @@
 # startspeed
 
+![showcase](https://raw.githubusercontent.com/ConstantKrieg/startspeed/master/startspeed.gif)
+
+
 This project scores participant horses in a trotting race based on how often they have led a race after the first 500m in the past. It gives higher scores based on the start track from which the lead has been taken. It is intended for personal use as assistance when betting on trotting races.
 
 The API's used do not allow any kind of radily available application to be made public so API addresses are not available on this repo. 
